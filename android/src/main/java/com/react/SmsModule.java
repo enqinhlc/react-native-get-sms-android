@@ -225,8 +225,11 @@ public class SmsModule extends ReactContextBaseJavaModule /*implements LoaderMan
             String SENT = "SMS_SENT";
             String DELIVERED = "SMS_DELIVERED";
 
+            Intent deliveredIntent = new Intent(DELIVERED);
+            deliveredIntent.putExtra("phoneNumber", phoneNumber);
+
             PendingIntent sentPI = PendingIntent.getBroadcast(context, 0, new Intent(SENT), 0);
-            PendingIntent deliveredPI = PendingIntent.getBroadcast(context, 0, new Intent(DELIVERED), 0);
+            PendingIntent deliveredPI = PendingIntent.getBroadcast(context, 0, deliveredIntent, 0);
 
             //---when the SMS has been sent---
             context.registerReceiver(new BroadcastReceiver() {
@@ -256,12 +259,13 @@ public class SmsModule extends ReactContextBaseJavaModule /*implements LoaderMan
             context.registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context arg0, Intent arg1) {
+                    String phoneNumber = arg1.getStringExtra("phoneNumber");
                     switch (getResultCode()) {
                         case Activity.RESULT_OK:
-                            sendEvent(mReactContext, "sms_onDelivery", "SMS delivered");
+                            sendEvent(mReactContext, "sms_onDelivery", "SMS delivered: " + phoneNumber);
                             break;
                         case Activity.RESULT_CANCELED:
-                            sendEvent(mReactContext, "sms_onDelivery", "SMS not delivered");
+                            sendEvent(mReactContext, "sms_onDelivery", "SMS not delivered: " + phoneNumber);
                             break;
                     }
                 }
